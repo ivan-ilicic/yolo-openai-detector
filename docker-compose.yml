@@ -1,0 +1,30 @@
+# Reference single-host deployment.
+# The API key is taken from the host environment / secret — never bake it into the
+# image. Model ONNX files are supplied via the mounted ./models volume.
+services:
+  api:
+    build: .
+    image: yolo-detect-api:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # REQUIRED — provide via host env or a secret manager, not a committed file.
+      YOLO_DETECT_API_KEY: "${YOLO_DETECT_API_KEY:?set YOLO_DETECT_API_KEY in the host environment}"
+      YOLO_DETECT_MODELS_DIR: "/app/models"
+      YOLO_DETECT_AVAILABLE_MODELS: "yolo26-n,yolo26-s"
+      YOLO_DETECT_DEFAULT_MODEL: "yolo26-n"
+      YOLO_DETECT_ORT_INTRA_OP_THREADS: "1"
+      YOLO_DETECT_LOG_LEVEL: "INFO"
+    volumes:
+      # Populate ./models with exported ONNX files first (make export-model).
+      - ./models:/app/models:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; urllib.request.urlopen('http://localhost:8000/healthz'); "]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # Put TLS termination and any rate limiting in a reverse proxy in front of `api`.
+  # Omitted here to keep the reference minimal.

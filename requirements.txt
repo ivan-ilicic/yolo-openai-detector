@@ -1,0 +1,10 @@
+# Runtime dependencies (mirror of pyproject [project].dependencies).
+# Pin exact versions before first release. NO torch / NO ultralytics at runtime.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+gunicorn>=21.2
+pydantic>=2.6
+pydantic-settings>=2.2
+pillow>=10.2
+numpy>=1.26
+onnxruntime>=1.17

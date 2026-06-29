@@ -1,0 +1,62 @@
+[project]
+name = "yolo-detect-api"
+version = "0.1.0"
+description = "CPU-only single-shot object detection exposed through an OpenAI-compatible vision endpoint."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "AGPL-3.0-only" }
+authors = [{ name = "Project maintainers" }]
+
+# Runtime dependencies. Intentionally NO torch and NO ultralytics here:
+# the runtime serves an exported ONNX model via ONNX Runtime.
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "gunicorn>=21.2",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "pillow>=10.2",
+    "numpy>=1.26",
+    "onnxruntime>=1.17",
+]
+
+[project.optional-dependencies]
+# Developer + test tooling.
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "openai>=1.30",          # used by the golden compatibility test
+    "ruff>=0.4",
+    "mypy>=1.9",
+]
+# Offline model-export tooling only. AGPL (ultralytics). NOT a runtime dependency.
+export = [
+    "ultralytics>=8.3",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["yolo_detect_api"]
+ignore_missing_imports = true
+warn_unused_ignores = true
